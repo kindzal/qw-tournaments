@@ -1,5 +1,5 @@
 # Step 1: Build the Vite React app
-FROM node:18 AS build
+FROM node:25 AS build
 
 WORKDIR /app
 
