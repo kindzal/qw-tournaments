@@ -1,28 +1,133 @@
 // src/components/TournamentInfo.jsx
+// Replace entire file with this
+
 import React from 'react';
 
-export default function TournamentInfo() {
+export default function TournamentInfo({ tournament }) {
+  if (!tournament) return null;
+
+  const getTypeEmoji = (type) => {
+    return type === 'Online' ? '🌐' : '👥';
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'Active': 'text-green-400',
+      'Upcoming': 'text-yellow-400',
+      'Sign-up': 'text-orange-400',
+      'Completed': 'text-gray-400',
+    };
+    return colors[status] || 'text-gray-400';
+  };
+
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Mode */}
         <div>
-          <h3 className="text-sm font-medium text-gray-400 mb-1">Tournament Name</h3>
-          <p className="text-lg font-bold text-white">QuakeWorld League 2026</p>
-        </div>
-        
-        <div>
-          <h3 className="text-sm font-medium text-gray-400 mb-1">Mode</h3>
-          <p className="text-lg font-bold text-white">4on4</p>
-        </div>
-        
-        <div>
-          <h3 className="text-sm font-medium text-gray-400 mb-1">Status</h3>
+          <div className="text-sm text-gray-400 mb-1">MODE</div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <p className="text-lg font-bold text-green-400">Active</p>
+            <span className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm font-medium">
+              {tournament.mode}
+            </span>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div>
+          <div className="text-sm text-gray-400 mb-1">STATUS</div>
+          <div className={`font-medium ${getStatusColor(tournament.status)}`}>
+            ● {tournament.status}
+          </div>
+        </div>
+
+        {/* Type */}
+        <div>
+          <div className="text-sm text-gray-400 mb-1">TYPE</div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">{getTypeEmoji(tournament.type)}</span>
+            <span className="font-medium">{tournament.type}</span>
           </div>
         </div>
       </div>
+
+      {/* Dates */}
+      {(tournament.startDate || tournament.endDate) && (
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="text-sm text-gray-400 mb-1">DATES</div>
+          <div className="text-gray-300">
+            {tournament.startDate || 'TBC'} - {tournament.endDate || 'TBC'}
+          </div>
+        </div>
+      )}
+
+      {/* Maps */}
+      {tournament.maps && tournament.maps.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="text-sm text-gray-400 mb-2">MAPS</div>
+          <div className="flex flex-wrap gap-2">
+            {tournament.maps.map((map, index) => (
+              <span 
+                key={index}
+                className="px-2 py-1 bg-gray-700 text-gray-300 rounded text-sm"
+              >
+                {map}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Discord */}
+      {tournament.discord && (
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="text-sm text-gray-400 mb-2">DISCORD</div>
+          <a 
+            href={tournament.discord}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300 transition-colors inline-flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515a.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0a12.64 12.64 0 00-.617-1.25a.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057a19.9 19.9 0 005.993 3.03a.078.078 0 00.084-.028a14.09 14.09 0 001.226-1.994a.076.076 0 00-.041-.106a13.107 13.107 0 01-1.872-.892a.077.077 0 01-.008-.128a10.2 10.2 0 00.372-.292a.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127a12.299 12.299 0 01-1.873.892a.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028a19.839 19.839 0 006.002-3.03a.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+            </svg>
+            Join Discord Server
+          </a>
+        </div>
+      )}
+
+      {/* Other Links */}
+      {tournament.links && tournament.links.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="text-sm text-gray-400 mb-2">LINKS</div>
+          <div className="flex flex-wrap gap-2">
+            {tournament.links.map((link, index) => (
+              <a
+                key={index}
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1 bg-gray-700 text-blue-400 hover:text-blue-300 hover:bg-gray-600 rounded text-sm transition-colors inline-flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Link {index + 1}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Organizers */}
+      {tournament.organisers && tournament.organisers.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="text-sm text-gray-400 mb-1">ORGANIZERS</div>
+          <div className="text-gray-300">
+            {tournament.organisers.join(', ')}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

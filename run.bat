@@ -1,0 +1,5 @@
+@echo off
+
+set VITE_API_BASE_URL=https://script.google.com/macros/s/AKfycbyjF9Q6HJFmC4ghtiHx6sBbE6sJp0wcbPp531N6DdIC1PQNtN2iD2PL-fSqdiZxgVM/exec
+
+npm run dev

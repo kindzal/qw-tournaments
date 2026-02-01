@@ -313,7 +313,7 @@ const GameCard = ({ game }) => {
   const hasWinner = game.mapsWonA !== '' && game.mapsWonB !== '';
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+    <div className={`rounded-lg shadow-lg p-6 ${isPlayed ? 'bg-gray-800' : 'bg-gray-750/50 border-2 border-gray-600/50'}`}>
       <div className="flex justify-between items-center mb-4">
         <span className="text-sm font-medium text-gray-400">Round {game.round}</span>
         {game.date && (
@@ -323,18 +323,18 @@ const GameCard = ({ game }) => {
         )}
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex-1 text-right">
+      <div className="flex items-center justify-center mb-4">
+        <div className="flex-1 text-right pr-6">
           <div className="text-lg font-bold">{game.teamA}</div>
         </div>
         
-        <div className="mx-8 text-center">
+        <div className="mx-4 text-center min-w-[100px] flex items-center justify-center">
           {hasWinner ? (
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold flex items-center gap-2">
               <span className={game.mapsWonA > game.mapsWonB ? 'text-green-400' : 'text-gray-400'}>
                 {game.mapsWonA}
               </span>
-              <span className="mx-2 text-gray-500">-</span>
+              <span className="text-gray-500">-</span>
               <span className={game.mapsWonB > game.mapsWonA ? 'text-green-400' : 'text-gray-400'}>
                 {game.mapsWonB}
               </span>
@@ -344,7 +344,7 @@ const GameCard = ({ game }) => {
           )}
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 pl-6">
           <div className="text-lg font-bold">{game.teamB}</div>
         </div>
       </div>
@@ -354,22 +354,22 @@ const GameCard = ({ game }) => {
           <div className="text-sm text-gray-400 font-medium">Maps:</div>
           {game.maps.map((map, idx) => (
             <div key={idx} className="flex justify-between items-center bg-gray-700 rounded px-4 py-2">
-              <span className="font-medium">{map.mapName}</span>
-              <span className="text-sm">
+              <span className="font-medium w-32">{map.mapName}</span>
+              <div className="flex-1 flex items-center justify-center gap-2">
                 <span className={map.teamAFrags > map.teamBFrags ? 'text-green-400 font-bold' : ''}>
                   {map.teamAFrags}
                 </span>
-                <span className="mx-2 text-gray-500">-</span>
+                <span className="text-gray-500">-</span>
                 <span className={map.teamBFrags > map.teamAFrags ? 'text-green-400 font-bold' : ''}>
                   {map.teamBFrags}
                 </span>
-              </span>
+              </div>
               {map.gameUrl && (
                 <a 
                   href={map.gameUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 text-sm ml-4"
+                  className="text-blue-400 hover:text-blue-300 text-sm ml-auto"
                 >
                   View Game
                 </a>

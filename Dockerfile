@@ -12,7 +12,10 @@ RUN npm run build
 # Step 2: Serve the production build with nginx
 FROM nginx:alpine
 
-# Copy Vite's build output (dist folder) to nginx web root
+# Step 3: Copy nginx conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Step 4: Copy Vite's build output (dist folder) to nginx web root
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

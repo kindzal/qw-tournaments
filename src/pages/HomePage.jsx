@@ -1,4 +1,6 @@
 // src/pages/HomePage.jsx
+// Replace entire file - Added Active/Completed tabs + non-clickable for missing baseApiUrl
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchTournaments } from '../services/masterApi';
@@ -9,6 +11,7 @@ const HomePage = () => {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('active'); // 'active' or 'completed'
 
   useEffect(() => {
     loadTournaments();
@@ -26,6 +29,15 @@ const HomePage = () => {
       setLoading(false);
     }
   };
+
+  // Filter tournaments based on active tab
+  const filteredTournaments = tournaments.filter(t => {
+    if (activeFilter === 'active') {
+      return ['Sign-up', 'Active', 'Upcoming'].includes(t.status);
+    } else {
+      return ['Completed', 'Cancelled'].includes(t.status);
+    }
+  });
 
   if (loading) {
     return <LoadingSpinner message="Loading tournaments..." />;
@@ -58,17 +70,43 @@ const HomePage = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-white mb-2">Active Tournaments</h2>
-          <p className="text-gray-400">Select a tournament to view details</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Tournaments</h2>
+            <p className="text-gray-400">Select a tournament to view details</p>
+          </div>
+
+          {/* Active/Completed Filter Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveFilter('active')}
+              className={`px-6 py-2 rounded font-semibold transition-all ${
+                activeFilter === 'active'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Active
+            </button>
+            <button
+              onClick={() => setActiveFilter('completed')}
+              className={`px-6 py-2 rounded font-semibold transition-all ${
+                activeFilter === 'completed'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Completed
+            </button>
+          </div>
         </div>
 
-        {tournaments.length === 0 ? (
+        {filteredTournaments.length === 0 ? (
           <div className="text-center text-gray-400 py-12">
-            No tournaments available at the moment
+            No {activeFilter} tournaments available
           </div>
         ) : (
-          <TournamentTable tournaments={tournaments} />
+          <TournamentTable tournaments={filteredTournaments} />
         )}
       </main>
     </div>
@@ -83,6 +121,7 @@ const TournamentTable = ({ tournaments }) => {
       'Upcoming': { icon: '●', color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
       'Sign-up': { icon: '●', color: 'text-orange-400', bg: 'bg-orange-900/20' },
       'Completed': { icon: '●', color: 'text-gray-400', bg: 'bg-gray-700/20' },
+      'Cancelled': { icon: '●', color: 'text-red-400', bg: 'bg-red-900/20' },
     };
     return icons[status] || icons['Active'];
   };
@@ -113,26 +152,22 @@ const TournamentTable = ({ tournaments }) => {
           <tbody className="bg-gray-800 divide-y divide-gray-700">
             {tournaments.map((tournament, index) => {
               const statusInfo = getStatusIcon(tournament.status);
+              const hasBaseApiUrl = tournament.baseApiUrl && tournament.baseApiUrl.trim() !== '';
               
-              return (
+              const TournamentRow = () => (
                 <tr 
                   key={tournament.slug || index}
-                  className="hover:bg-gray-700 transition-colors cursor-pointer"
+                  className={hasBaseApiUrl ? "hover:bg-gray-700 transition-colors cursor-pointer" : "opacity-60 cursor-not-allowed"}
                 >
                   <td className="px-4 py-4">
-                    <Link 
-                      to={`/${tournament.slug}`}
-                      className="block"
-                    >
-                      <div className="font-medium text-white hover:text-blue-400 transition-colors">
-                        {tournament.slugName || tournament.tourneyName}
+                    <div className="font-medium text-white">
+                      {tournament.slugName || tournament.tourneyName}
+                    </div>
+                    {tournament.tourneyDescription && (
+                      <div className="text-xs text-gray-400 mt-1 line-clamp-2">
+                        {tournament.tourneyDescription}
                       </div>
-                      {tournament.tourneyDescription && (
-                        <div className="text-xs text-gray-400 mt-1 line-clamp-2">
-                          {tournament.tourneyDescription}
-                        </div>
-                      )}
-                    </Link>
+                    )}
                   </td>
                   
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -170,6 +205,19 @@ const TournamentTable = ({ tournaments }) => {
                     </div>
                   </td>
                 </tr>
+              );
+
+              // If has baseApiUrl, wrap in Link; otherwise just render
+              return hasBaseApiUrl ? (
+                <Link 
+                  to={`/${tournament.slug}`}
+                  className="contents"
+                  key={tournament.slug || index}
+                >
+                  <TournamentRow />
+                </Link>
+              ) : (
+                <TournamentRow key={tournament.slug || index} />
               );
             })}
           </tbody>

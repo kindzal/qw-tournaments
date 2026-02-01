@@ -1,4 +1,6 @@
 // src/components/Header.jsx
+// Replace entire file - Logo only links to home, not the text
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTournament } from '../contexts/TournamentContext';
@@ -25,21 +27,19 @@ export default function Header({ activeTab, setActiveTab, onRefresh }) {
     <header className="bg-gray-800 border-b border-gray-700 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo & Home Link */}
+          {/* Logo & Title - ONLY LOGO LINKS TO HOME */}
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 rounded shadow-lg">
-                <span className="font-bold text-white text-lg">QW</span>
-              </div>
-              <div>
-                <h1 className="font-bold text-lg text-white">
-                  {currentTournament ? currentTournament.slugName || currentTournament.tourneyName : 'QuakeWorld'}
-                </h1>
-                <p className="text-xs text-gray-400 -mt-1">
-                  {currentTournament ? 'Tournament Admin' : 'Tournament Hub'}
-                </p>
-              </div>
+            <Link to="/" className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 rounded shadow-lg hover:opacity-80 transition-opacity">
+              <span className="font-bold text-white text-lg">QW</span>
             </Link>
+            <div>
+              <h1 className="font-bold text-lg text-white">
+                {currentTournament ? currentTournament.slugName || currentTournament.tourneyName : 'QuakeWorld'}
+              </h1>
+              <p className="text-xs text-gray-400 -mt-1">
+                {currentTournament ? 'Tournament Admin' : 'Tournament Hub'}
+              </p>
+            </div>
           </div>
 
           {/* Navigation */}
