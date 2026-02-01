@@ -1,17 +1,77 @@
 // src/pages/TournamentPage.jsx
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import TournamentInfo from '../components/TournamentInfo';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import WikiExport from '../components/WikiExport';
 import { useTournament } from '../contexts/TournamentContext';
 import { fetchStandings, fetchPlayers, fetchGroupGames, fetchPlayoffGames, fetchTeams, fetchScheduleConfig } from '../services/api';
 
+/**
+ * Compact tournament info bar
+ * Shows: status, mode, dates, maps, discord
+ * No header, no description
+ */
+const CompactTournamentInfo = ({ tournament }) => {
+  if (!tournament) return null;
+
+  const {
+    status,
+    mode,
+    startDate,
+    endDate,
+    maps,
+    discord
+  } = tournament;
+
+  return (
+    <div className="bg-gray-800 rounded-lg shadow-md px-6 py-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-300">
+      <div className="flex items-center gap-2">
+        <span>🟢</span>
+        <span className="font-medium">{status || 'Unknown'}</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span>🎮</span>
+        <span>{mode || 'N/A'}</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span>📅</span>
+        <span>
+          {startDate || 'TBC'}
+          {endDate && ` → ${endDate}`}
+        </span>
+      </div>
+
+      {maps && maps.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span>🗺️</span>
+          <span>{maps.join(' ● ')}</span>
+        </div>
+      )}
+
+      {discord && (
+        <div className="flex items-center gap-2">
+          <span>💬</span>
+          <a
+            href={discord}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300"
+          >
+            Discord
+          </a>
+        </div>
+      )}
+    </div>
+  );
+};
+
 function TournamentPage() {
   const [activeTab, setActiveTab] = useState('standings');
   const { currentTournament, loading: tournamentLoading, error: tournamentError, baseApiUrl } = useTournament();
-  
+
   const [data, setData] = useState({
     standings: null,
     players: null,
@@ -23,14 +83,13 @@ function TournamentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch all tournament data when baseApiUrl is available
   useEffect(() => {
     if (!baseApiUrl) return;
 
     const fetchAllData = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const [standings, players, groupGames, playoffGames, teams, scheduleConfig] = await Promise.all([
           fetchStandings(baseApiUrl),
@@ -60,78 +119,36 @@ function TournamentPage() {
   }, [baseApiUrl]);
 
   const refetch = () => {
-    if (baseApiUrl) {
-      // Trigger re-fetch by updating a dependency
-      window.location.reload();
-    }
+    if (baseApiUrl) window.location.reload();
   };
 
-  if (tournamentLoading) {
-    return <LoadingSpinner message="Loading tournament..." />;
-  }
-
-  if (tournamentError) {
-    return <ErrorMessage error={tournamentError} onRetry={() => window.location.reload()} />;
-  }
-
-  if (!currentTournament) {
-    return <ErrorMessage error="Tournament not found" onRetry={() => window.location.href = '/'} />;
-  }
-
-  if (loading) {
-    return <LoadingSpinner message="Loading tournament data..." />;
-  }
-
-  if (error) {
-    return <ErrorMessage error={error} onRetry={refetch} />;
-  }
-
-  if (!data.standings && !data.players && !data.groupGames) {
-    return <ErrorMessage error="No tournament data available" onRetry={refetch} />;
-  }
-
-  if (loading) {
-    return <LoadingSpinner message="Loading tournament data..." />;
-  }
-
-  if (error) {
-    return <ErrorMessage error={error} onRetry={refetch} />;
-  }
-
-  if (!data) {
-    return <ErrorMessage error="No data available" onRetry={refetch} />;
-  }
+  if (tournamentLoading) return <LoadingSpinner message="Loading tournament..." />;
+  if (tournamentError) return <ErrorMessage error={tournamentError} onRetry={refetch} />;
+  if (!currentTournament) return <ErrorMessage error="Tournament not found" onRetry={() => window.location.href = '/'} />;
+  if (loading) return <LoadingSpinner message="Loading tournament data..." />;
+  if (error) return <ErrorMessage error={error} onRetry={refetch} />;
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={refetch} />
-      
-      <main className="container mx-auto px-4 py-8">
-        <TournamentInfo />
-        
-        <div className="mt-8">
-          {activeTab === 'standings' && (
-            <StandingsView data={data.standings} />
-          )}
-          
-          {activeTab === 'players' && (
-            <PlayersView data={data.players} />
-          )}
-          
+
+      <main className="container mx-auto px-4 py-8 space-y-6">
+        {/* Compact tournament info (replaces TournamentInfo) */}
+        <CompactTournamentInfo tournament={currentTournament} />
+
+        <div className="mt-4">
+          {activeTab === 'standings' && <StandingsView data={data.standings} />}
+          {activeTab === 'players' && <PlayersView data={data.players} />}
           {activeTab === 'schedule' && (
-            <ScheduleView 
+            <ScheduleView
               groupGames={data.groupGames}
               playoffGames={data.playoffGames}
               scheduleConfig={data.scheduleConfig}
             />
           )}
-          
-          {activeTab === 'teams' && (
-            <TeamsView data={data.teams} />
-          )}
-          
+          {activeTab === 'teams' && <TeamsView data={data.teams} />}
           {activeTab === 'wiki' && (
-            <WikiExport 
+            <WikiExport
               standings={data.standings}
               groupGames={data.groupGames}
               playoffGames={data.playoffGames}
@@ -144,6 +161,7 @@ function TournamentPage() {
   );
 }
 
+/* ---- existing view components unchanged below ---- */
 // Standings View Component
 const StandingsView = ({ data }) => {
   if (!data || data.length === 0) {
@@ -244,7 +262,7 @@ const PlayersView = ({ data }) => {
                   {formatPercentage(player['Win Rate'])}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
-                  {formatNumber(player['Avg Eff'], 2)}
+                  {formatPercentage(player['Avg Eff'])}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
                   {formatInteger(player['Avg Dmg'])}
